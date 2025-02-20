@@ -103,7 +103,6 @@ function Markdown.generateMarkdownDocumentFor(classDocumentation: Moonwave.DataE
 
 	markdownFile ..= newline()
 
-
 	markdownFile ..= comment(`----- DOCUMENT INTRODUCTION ----- `)
 
 	markdownFile ..= newline()
