@@ -7,7 +7,7 @@ type TreeInner = {
 	trans: { number }, -- Length of 288, stores code to symbol translations
 }
 
---- Creates a new Tree instance with initialized tables
+--] Creates a new Tree instance with initialized tables
 function Tree.new(): Tree
 	return setmetatable(
 		{
@@ -35,7 +35,7 @@ export type DataInner = {
     dtree: Tree,        -- Distance tree for current block
 }
 
---- Creates a new Data instance with initialized compression state
+--] Creates a new Data instance with initialized compression state
 function Data.new(source: buffer, dest: buffer): Data
 	return setmetatable(
 		{
@@ -74,7 +74,7 @@ local clcIndex = {
 local codeTree = Tree.new()
 local lengths = table.create(288 + 32, 0)
 
---- Builds the extra bits and base tables for length and distance codes
+--] Builds the extra bits and base tables for length and distance codes
 local function buildBitsBase(bits: { number }, base: { number }, delta: number, first: number)
 	local sum = first
 
@@ -93,7 +93,7 @@ local function buildBitsBase(bits: { number }, base: { number }, delta: number, 
 	end
 end
 
---- Constructs the fixed Huffman trees used in DEFLATE format
+--] Constructs the fixed Huffman trees used in DEFLATE format
 local function buildFixedTrees(lengthTree: Tree, distTree: Tree)
 	-- Build the fixed length tree according to DEFLATE specification
 	for i = 0, 6 do
@@ -128,10 +128,10 @@ local function buildFixedTrees(lengthTree: Tree, distTree: Tree)
 	end
 end
 
---- Temporary array for building trees
+--] Temporary array for building trees
 local offs = table.create(16, 0)
 
---- Builds a Huffman tree from a list of code lengths
+--] Builds a Huffman tree from a list of code lengths
 local function buildTree(t: Tree, lengths: { number }, off: number, num: number)
 	-- Initialize the code length count table
 	for i = 0, 15 do
@@ -162,7 +162,7 @@ local function buildTree(t: Tree, lengths: { number }, off: number, num: number)
 	end
 end
 
---- Reads a single bit from the input stream
+--] Reads a single bit from the input stream
 local function getBit(d: Data): number
 	if d.bitcount <= 0 then
 		d.tag = buffer.readu8(d.source, d.sourceIndex)
@@ -177,7 +177,7 @@ local function getBit(d: Data): number
 	return bit
 end
 
---- Reads multiple bits from the input stream with a base value
+--] Reads multiple bits from the input stream with a base value
 local function readBits(d: Data, num: number?, base: number): number
 	if not num then
 		return base
@@ -197,7 +197,7 @@ local function readBits(d: Data, num: number?, base: number): number
 	return val + base
 end
 
---- Decodes a symbol using a Huffman tree
+--] Decodes a symbol using a Huffman tree
 local function decodeSymbol(d: Data, t: Tree): number
 	while d.bitcount < 24 and d.sourceIndex < buffer.len(d.source) do
 		d.tag = bit32.bor(d.tag, bit32.lshift(buffer.readu8(d.source, d.sourceIndex), d.bitcount))
@@ -223,7 +223,7 @@ local function decodeSymbol(d: Data, t: Tree): number
 	return t.trans[sum + cur]
 end
 
---- Decodes the dynamic Huffman trees for a block
+--] Decodes the dynamic Huffman trees for a block
 local function decodeTrees(d: Data, lengthTree: Tree, distTree: Tree)
 	local hlit = readBits(d, 5, 257) -- Number of literal/length codes
 	local hdist = readBits(d, 5, 1) -- Number of distance codes
@@ -278,7 +278,7 @@ local function decodeTrees(d: Data, lengthTree: Tree, distTree: Tree)
 	buildTree(distTree, lengths, hlit, hdist)
 end
 
---- Inflates a block of data using Huffman trees
+--] Inflates a block of data using Huffman trees
 local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 	while true do
 		local sym = decodeSymbol(d, lengthTree)
@@ -310,7 +310,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 	end
 end
 
---- Processes an uncompressed block
+--] Processes an uncompressed block
 local function inflateUncompressedBlock(d: Data)
 	-- Align to byte boundary
 	local bytesToMove = d.bitcount // 8
@@ -342,7 +342,7 @@ local function inflateUncompressedBlock(d: Data)
 	d.bitcount = 0
 end
 
---- Main decompression function that processes DEFLATE compressed data
+--] Main decompression function that processes DEFLATE compressed data
 local function uncompress(source: buffer, uncompressedSize: number?): buffer
 	local dest = buffer.create(
 		-- If the uncompressed size is known, we use that, otherwise we use a default

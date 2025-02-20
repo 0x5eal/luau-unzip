@@ -1,4 +1,4 @@
---- Canonicalize a path by removing redundant components
+--] Canonicalize a path by removing redundant components
 local function canonicalize(path: string): string
 	-- We convert any `\\` separators to `/` separators to ensure consistency
 	local components = string.split(path:gsub("\\", "/"), "/")
@@ -22,7 +22,7 @@ local function canonicalize(path: string): string
 	return table.concat(result, "/")
 end
 
---- Check if a path is absolute
+--] Check if a path is absolute
 local function isAbsolute(path: string): boolean
 	return (
 		string.match(path, "^/")
@@ -32,7 +32,7 @@ local function isAbsolute(path: string): boolean
 	) ~= nil
 end
 
---- Check if a path is relative
+--] Check if a path is relative
 local function isRelative(path: string): boolean
 	return not isAbsolute(path)
 end
@@ -48,10 +48,10 @@ local function replaceBackslashes(input: string, replacement: "/"): string
 	end
 end
 
---- Check if a path is safe to use, i.e., it does not:
---- - Contain null bytes
---- - Resolve to a directory outside of the current directory
---- - Have absolute components
+--] Check if a path is safe to use, i.e., it does not:
+--] - Contain null bytes
+--] - Resolve to a directory outside of the current directory
+--] - Have absolute components
 local function isSafe(path: string): boolean
 	if string.find(path, "\0") or isAbsolute(path) then
 		-- Null bytes or absolute path, path is unsafe
@@ -89,10 +89,10 @@ local function isSafe(path: string): boolean
 	return depth >= 0
 end
 
---- Sanitize a path by ignoring special components
---- - Absolute paths become relative
---- - Special components (like upwards traversing) are removed
---- - Truncates path to the first null byte
+--] Sanitize a path by ignoring special components
+--] - Absolute paths become relative
+--] - Special components (like upwards traversing) are removed
+--] - Truncates path to the first null byte
 local function sanitize(path: string): string
 	local truncatedPath = if string.find(path, "\0") then string.split(path, "\0")[1] else path
 	local components = string.split(replaceBackslashes(truncatedPath, "/"), "/")
