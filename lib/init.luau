@@ -1,6 +1,6 @@
-local inflate = require("./inflate")
-local validateCrc = require("./utils/validate_crc")
-local path = require("./utils/path")
+local inflate = require("@self/inflate")
+local validateCrc = require("@self/utils/validate_crc")
+local path = require("@self/utils/path")
 
 -- The maximum supported PKZIP format specification version that we support
 local MAX_SUPPORTED_PKZIP_VERSION = 63
