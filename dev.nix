@@ -99,37 +99,38 @@ pkgs.mkShell {
     # General devtools and test requirements
     pkgs.curl
     pkgs.git
-    (buildDerivation "unzip" "6.0-28" "s9lSnDQ4LMjS5syCmaGFNlBO28KEuRM/++UicEhlBo4=" pkgs.bzip2)
-    (buildDerivation "zip" "3.0-14" "0vsh9c5wfbwsx1r1b5mkfxj5vy1xqv0wbj2i93jysyb7x1c3pq8n" pkgs.zlib)
+    (buildDerivation "unzip" "6.0-29" "YY30d9W3BOQ3z45mBtA68pGtCzPc+5ZNQI940weTOpU=" pkgs.bzip2)
+    (buildDerivation "zip" "3.0-15" "e/y9Af0ZyPdFMzVh/AbEra2fS0FtRfhoXNgfsYf1Wcs=" pkgs.zlib)
 
     # Luau tooling
     pkgs.lune
     (fromGithubRelease {
       name = "pesde-pkg/pesde";
       exeName = "pesde";
-      version = "v0.6.0+registry.0.2.0";
-      artifactName = "pesde-0.6.0-linux-x86_64.zip";
-      sha256 = "o93kqg7ykIL9bJjTPdGxmzd1xqwfCLjiGj26xF+I+ho=";
+      version = "v0.7.1+registry.0.2.3";
+      artifactName = "pesde-0.7.1-linux-x86_64.zip";
+      sha256 = "Df1tyq0cDt6dvU7usPdOVwcaY6yNF7ths/TGhhq2X24=";
     })
     (fromGithubRelease {
       name = "evaera/moonwave";
       exeName = "moonwave-extractor";
-      version = "v1.2.1";
-      artifactName = "moonwave-extractor-v1.2.1-linux.zip";
-      sha256 = "UPZ5ZIazNNBcqny7srFIkHqX0t09r0F1M9q4KyjLNgQ=";
+      version = "v1.3.0";
+      artifactName = "moonwave-extractor-v1.3.0-linux.zip";
+      sha256 = "RMFdmEat+F/4WdLtcl/d8r1D6eRp8xsk05zEmMiYi2M=";
     })
     (fromPesdeManifest {
       name = "JohnnyMorganz/luau-lsp";
       exeName = "luau-lsp";
       pesdePackage = "pesde/luau_lsp";
-      artifactName = "luau-lsp-linux.zip";
-      sha256 = "kqse5GN7Vtv8uhsybN5h21wjfEXsMK5jTePn/D3eIrY=";
+      artifactName = "luau-lsp-linux-x86_64.zip";
+      sha256 = "vyQUyJnBSRJl/18Y7sbk2f2BW5pzXz+YUcJ9Cv2zngo=";
     })
     (fromPesdeManifest {
       name = "JohnnyMorganz/StyLua";
       exeName = "stylua";
+	  pesdePackage = "pesde/stylua";
       artifactName = "stylua-linux-x86_64.zip";
-      sha256 = "nzMJELcyczbCkbWPEAhIqESd90CseTYJs19+KA09OiI=";
+      sha256 = "24VY/zesW5+t7dP0jMD4jHR/xYUHqKVG3utkmTetjHY=";
     })
   ];
 
