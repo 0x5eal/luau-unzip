@@ -37,7 +37,7 @@ return function(test: typeof(frktest.test))
 
 			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer
 			local expectedBin =
-				process.spawn("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
+				process.exec("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
 			check.is_true(expectedBin.ok)
 
 			-- Compare hashes instead of the entire binary to improve speed and not print out
@@ -71,7 +71,7 @@ return function(test: typeof(frktest.test))
 			local data = fs.readFile("tests/data/max_comment_size.zip")
 			local zip = ZipReader.load(buffer.fromstring(data))
 
-			local unzipResult = process.spawn("unzip", { "-z", "tests/data/max_comment_size.zip" })
+			local unzipResult = process.exec("unzip", { "-z", "tests/data/max_comment_size.zip" })
 			assert(unzipResult.ok)
 
 			local commentData = assert(string.match(unzipResult.stdout, "\n(.*)\n"))

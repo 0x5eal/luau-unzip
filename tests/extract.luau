@@ -45,7 +45,7 @@ return function(test: typeof(frktest.test))
 						end
 
 						-- Extract with unzip for comparison
-						local unzipOutput = process.spawn(`unzip`, { "-p", zipPath, entry:getPath() })
+						local unzipOutput = process.exec(`unzip`, { "-p", zipPath, entry:getPath() })
 
 						-- NOTE: We use assert since we don't know whether to expect true or false
 						assert(unzipOutput.ok)

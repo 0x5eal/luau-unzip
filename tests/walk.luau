@@ -29,7 +29,7 @@ return function(test: typeof(frktest.test))
 				table.sort(entries)
 
 				-- Get entries from unzip command
-				local result = process.spawn("unzip", { "-l", file })
+				local result = process.exec("unzip", { "-l", file })
 				check.is_true(result.ok)
 
 				-- Parse unzip output into sorted array

@@ -3,7 +3,7 @@
 local stdio = require("@lune/stdio")
 
 local frktest = require("../../lune_packages/frktest")
-local Reporter = frktest._reporters.lune_console_reporter
+local Reporter = frktest.reporters.console_reporter
 
 local watch = require("../util/channel")
 

@@ -104,7 +104,7 @@ return function(test: typeof(frktest.test))
 					local zip = unzip.load(buffer.fromstring(data))
 
 					-- Get sizes from unzip command
-					local unzipResult = process.spawn("unzip", { "-v", file })
+					local unzipResult = process.exec("unzip", { "-v", file })
 					-- HACK: We use assert here since we don't know if we expect false or true
 					assert(unzipResult.ok)
 
@@ -128,7 +128,7 @@ return function(test: typeof(frktest.test))
 								check.not_nil(entry:unixMode())
 							end
 
-							local ok, zipinfoResult = pcall(process.spawn, "zipinfo", { file, name })
+							local ok, zipinfoResult = pcall(process.exec, "zipinfo", { file, name })
 							if ok then
 								-- Errors can only occur when there is a non utf-8 file name, in which case
 								-- we skip that file
