@@ -104,6 +104,13 @@ pkgs.mkShell {
 
     # Luau tooling
     pkgs.lune
+	(fromGithubRelease {
+      name = "lune-org/lune";
+      exeName = "lune";
+      version = "v0.10.2";
+      artifactName = "lune-0.10.2-linux-x86_64.zip";
+      sha256 = "8U1qktadMqgLtz2aKFCkOSMn4CrOhxaJWOZaBuaoQvA=";
+    })
     (fromGithubRelease {
       name = "pesde-pkg/pesde";
       exeName = "pesde";
