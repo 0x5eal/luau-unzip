@@ -14,7 +14,7 @@ includes = [
 ]
 
 [engines]
-pesde = "^0.7.0"
+pesde = "=0.7.0"
 
 [scripts]
 tests = ".lune/tests/init.luau"
