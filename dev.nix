@@ -103,7 +103,6 @@ pkgs.mkShell {
     (buildDerivation "zip" "3.0-15" "e/y9Af0ZyPdFMzVh/AbEra2fS0FtRfhoXNgfsYf1Wcs=" pkgs.zlib)
 
     # Luau tooling
-    pkgs.lune
 	(fromGithubRelease {
       name = "lune-org/lune";
       exeName = "lune";
