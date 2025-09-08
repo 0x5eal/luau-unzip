@@ -3,7 +3,7 @@
 local fs = require("@lune/fs")
 local process = require("@lune/process")
 
-local frktest = require("../lune_packages/frktest")
+local frktest = require("../luau_packages/frktest")
 local reporter = require("@self/reporter")
 
 -- HACK: Cast require to allow for dynamic paths in strict mode
