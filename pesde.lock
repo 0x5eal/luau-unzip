@@ -15,16 +15,16 @@ frktest = [{ name = "itsfrank/frktest", version = "^0.0.2", index = "https://git
 luau-lsp = [{ name = "pesde/luau_lsp", version = "=1.39.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 stylua = [{ name = "pesde/stylua", version = "=2.0.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."abidbmt/frktest@0.1.1 lune"]
-direct = ["frktest", { name = "abidbmt/frktest", version = "^0.1.1", index = "default", target = "lune" }, "dev"]
-
-[graph."abidbmt/frktest@0.1.1 lune".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/pesde-pkg/index"
-
 [graph."corecii/greentea@0.4.11 lune".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/daimond113/pesde-index"
+
+[graph."itsfrank/frktest@0.0.3 luau"]
+direct = ["frktest", { name = "itsfrank/frktest", version = "^0.0.3", index = "default" }, "dev"]
+
+[graph."itsfrank/frktest@0.0.3 luau".pkg_ref]
+ref_ty = "pesde"
+index_url = "https://github.com/pesde-pkg/index"
 
 [graph."jiwonz/dirs@0.3.0 lune".dependencies]
 greentea = ["corecii/greentea@0.4.11 lune", "standard"]

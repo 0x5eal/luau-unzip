@@ -14,7 +14,7 @@ includes = [
 ]
 
 [engines]
-pesde = "=0.7.0"
+pesde = "=0.7.1"
 
 [scripts]
 tests = ".lune/tests/init.luau"
@@ -31,6 +31,6 @@ default = "https://github.com/pesde-pkg/index"
 
 [dev_dependencies]
 stylua = { name = "pesde/stylua", version = "=2.1.0", target = "lune" }
-frktest = { name = "abidbmt/frktest", version = "^0.1.1", target = "lune" }
+frktest = { name = "itsfrank/frktest", version = "^0.0.3" }
 asciitable = { name = "kimpure/asciitable", version = "^0.2.2" }
 luau-lsp = { name = "pesde/luau_lsp", version = "=1.53.2", target = "lune" }
