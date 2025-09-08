@@ -31,6 +31,6 @@ default = "https://github.com/pesde-pkg/index"
 
 [dev_dependencies]
 stylua = { name = "pesde/stylua", version = "=2.1.0", target = "lune" }
-frktest = { name = "itsfrank/frktest", version = "^0.0.3" }
+frktest = { name = "itsfrank/frktest", version = "^0.0.4" }
 asciitable = { name = "kimpure/asciitable", version = "^0.2.2" }
 luau-lsp = { name = "pesde/luau_lsp", version = "=1.53.2", target = "lune" }

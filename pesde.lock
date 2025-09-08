@@ -19,10 +19,10 @@ stylua = [{ name = "pesde/stylua", version = "=2.0.2", index = "https://github.c
 ref_ty = "pesde"
 index_url = "https://github.com/daimond113/pesde-index"
 
-[graph."itsfrank/frktest@0.0.3 luau"]
-direct = ["frktest", { name = "itsfrank/frktest", version = "^0.0.3", index = "default" }, "dev"]
+[graph."itsfrank/frktest@0.0.4 luau"]
+direct = ["frktest", { name = "itsfrank/frktest", version = "^0.0.4", index = "default" }, "dev"]
 
-[graph."itsfrank/frktest@0.0.3 luau".pkg_ref]
+[graph."itsfrank/frktest@0.0.4 luau".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
