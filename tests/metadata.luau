@@ -103,13 +103,23 @@ return function(test: typeof(frktest.test))
 					local data = fs.readFile(file)
 					local zip = unzip.load(buffer.fromstring(data))
 
-					-- Get sizes from unzip command
-					local unzipResult = process.exec("unzip", { "-v", file })
-					-- HACK: We use assert here since we don't know if we expect false or true
-					assert(unzipResult.ok)
+					-- Fix pipe buffer overload by writing data into temp file and reading the temp file
+					local tmpOut = "/tmp/unzip_meta_"
+						.. tostring(os.time())
+						.. "_"
+						.. tostring(math.random(1, 1_000_000_000))
+						.. ".txt"
+
+					local command = `unzip -v {file} > {tmpOut}`
+					local execResult = process.exec("sh", { "-lc", command })
+
+					local unzipStdout = fs.readFile(tmpOut)
+					fs.removeFile(tmpOut)
+
+					assert(execResult.ok)
 
 					-- Parse unzip output
-					for line in string.gmatch(unzipResult.stdout, "[^\r\n]+") do
+					for line in string.gmatch(unzipStdout, "[^\r\n]+") do
 						if
 							not string.match(line, "^Archive:")
 							and not string.match(line, "^%s+Length")

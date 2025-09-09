@@ -14,7 +14,6 @@ local FALLIBLES = {
 	"invalid_offset.zip",
 	"invalid_offset2.zip",
 	"chinese.zip", -- Contains non local specific encoding which can't be parsed without OS APIs
-	"non_utf8.zip", -- FIXME: Lune breaks for non utf8 data in process stdout
 }
 
 return function(test: typeof(frktest.test))
@@ -45,26 +44,37 @@ return function(test: typeof(frktest.test))
 						end
 
 						-- Extract with unzip for comparison
-						local unzipOutput = process.exec(`unzip`, { "-p", zipPath, entry:getPath() })
+						-- Fix pipe buffer overload by writing data into temp file and reading the temp file
+						local tmpOut = "/tmp/unzip_meta_"
+							.. tostring(os.time())
+							.. "_"
+							.. tostring(math.random(1, 1_000_000_000))
+							.. ".txt"
+
+						local command = `unzip -p {zipPath} {entry:getPath()} > {tmpOut}`
+						local execResult = process.exec("sh", { "-lc", command })
+
+						local unzipStdout = fs.readFile(tmpOut)
+						fs.removeFile(tmpOut)
 
 						-- NOTE: We use assert since we don't know whether to expect true or false
-						assert(unzipOutput.ok)
+						assert(execResult.ok)
 
 						-- Test string extraction
 						local contentString = zip:extract(entry, stringOptions) :: string
 						check.equal(#contentString, entry.size)
-						check.equal(contentString, unzipOutput.stdout)
+						check.equal(contentString, unzipStdout)
 
 						-- Test buffer extraction
 						local contentBuffer = zip:extract(entry, bufferOptions) :: buffer
 						check.equal(buffer.len(contentBuffer), entry.size)
-						check.equal(buffer.tostring(contentBuffer), unzipOutput.stdout)
+						check.equal(buffer.tostring(contentBuffer), unzipStdout)
 
 						-- Test directory extraction
 						local parentPath = entry:getPath():match("(.+)/[^/]*$") or "/"
 						local dirContents = zip:extractDirectory(parentPath, stringOptions)
 						check.not_nil(dirContents[entry:getPath()])
-						check.equal(dirContents[entry:getPath()], unzipOutput.stdout)
+						check.equal(dirContents[entry:getPath()], unzipStdout)
 					end)
 
 					return
