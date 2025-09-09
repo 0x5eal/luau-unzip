@@ -50,7 +50,7 @@ print("Total size:", stats.totalSize, "bytes")
 ```
 
 ## MSLV (Minimum Supported Luau Version)
-This library requires at least Luau [0.669](https://github.com/luau-lang/luau/releases/tag/0.669) (specifically requires `@self` alias, leading `|`, `buffer` built-in and `idiv` operator support).
+This library requires at least Luau [0.669](https://github.com/luau-lang/luau/releases/tag/0.669) (specifically requires the new require-by-string semantics, leading `|`, `buffer` built-in and `idiv` operator support).
 
 ## Contributing
 Contributions are heavily welcomed! We use Nix Flakes to manage a reproducible development environment. To get started, run `exec nix develop -c $SHELL`, after [installing Nix](https://nixos.wiki/wiki/Nix_Installation_Guide). This is recommended for tests to be consistent, since we rely on `InfoZIP` implementations as sanity checks, although different distributions supply differently patched versions of it.
