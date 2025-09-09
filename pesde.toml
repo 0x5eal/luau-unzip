@@ -34,3 +34,4 @@ stylua = { name = "pesde/stylua", version = "=2.1.0", target = "lune" }
 frktest = { name = "itsfrank/frktest", version = "^0.0.4" }
 asciitable = { name = "kimpure/asciitable", version = "^0.2.3" }
 luau-lsp = { name = "pesde/luau_lsp", version = "=1.53.2", target = "lune" }
+dirs = { name = "jiwonz/dirs", version = "^0.6.0", target = "lune" }

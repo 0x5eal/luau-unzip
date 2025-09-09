@@ -3,6 +3,7 @@ local process = require("@lune/process")
 
 local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
+local dirs = require("../lune_packages/dirs")
 
 local ZipReader = require("../lib")
 
@@ -45,17 +46,14 @@ return function(test: typeof(frktest.test))
 
 						-- Extract with unzip for comparison
 						-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-						local tmpOut = "/tmp/unzip_meta_"
-							.. tostring(os.time())
-							.. "_"
-							.. tostring(math.random(1, 1_000_000_000))
-							.. ".txt"
+						local tempFile = dirs.createTempFile()
+						local tempFilePath = tempFile.path:toString()
 
-						local command = `unzip -p {zipPath} {entry:getPath()} > {tmpOut}`
+						local command = `unzip -p {zipPath} {entry:getPath()} > {tempFilePath}`
 						local execResult = process.exec("sh", { "-lc", command })
 
-						local unzipStdout = fs.readFile(tmpOut)
-						fs.removeFile(tmpOut)
+						local unzipOutput = fs.readFile(tempFilePath)
+						tempFile:removeFile()
 
 						-- NOTE: We use assert since we don't know whether to expect true or false
 						assert(execResult.ok)
@@ -63,18 +61,18 @@ return function(test: typeof(frktest.test))
 						-- Test string extraction
 						local contentString = zip:extract(entry, stringOptions) :: string
 						check.equal(#contentString, entry.size)
-						check.equal(contentString, unzipStdout)
+						check.equal(contentString, unzipOutput)
 
 						-- Test buffer extraction
 						local contentBuffer = zip:extract(entry, bufferOptions) :: buffer
 						check.equal(buffer.len(contentBuffer), entry.size)
-						check.equal(buffer.tostring(contentBuffer), unzipStdout)
+						check.equal(buffer.tostring(contentBuffer), unzipOutput)
 
 						-- Test directory extraction
 						local parentPath = entry:getPath():match("(.+)/[^/]*$") or "/"
 						local dirContents = zip:extractDirectory(parentPath, stringOptions)
 						check.not_nil(dirContents[entry:getPath()])
-						check.equal(dirContents[entry:getPath()], unzipStdout)
+						check.equal(dirContents[entry:getPath()], unzipOutput)
 					end)
 
 					return

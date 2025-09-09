@@ -4,6 +4,7 @@ local DateTime = require("@lune/datetime")
 
 local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
+local dirs = require("../lune_packages/dirs")
 
 local unzip = require("../lib")
 
@@ -104,22 +105,19 @@ return function(test: typeof(frktest.test))
 					local zip = unzip.load(buffer.fromstring(data))
 
 					-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-					local tmpOut = "/tmp/unzip_meta_"
-						.. tostring(os.time())
-						.. "_"
-						.. tostring(math.random(1, 1_000_000_000))
-						.. ".txt"
+					local tempFile = dirs.createTempFile()
+					local tempFilePath = tempFile.path:toString()
 
-					local command = `unzip -v {file} > {tmpOut}`
+					local command = `unzip -v {file} > {tempFilePath}`
 					local execResult = process.exec("sh", { "-lc", command })
 
-					local unzipStdout = fs.readFile(tmpOut)
-					fs.removeFile(tmpOut)
+					local unzipOutput = fs.readFile(tempFilePath)
+					tempFile:removeFile()
 
 					assert(execResult.ok)
 
 					-- Parse unzip output
-					for line in string.gmatch(unzipStdout, "[^\r\n]+") do
+					for line in string.gmatch(unzipOutput, "[^\r\n]+") do
 						if
 							not string.match(line, "^Archive:")
 							and not string.match(line, "^%s+Length")

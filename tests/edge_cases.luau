@@ -4,6 +4,7 @@ local serde = require("@lune/serde")
 
 local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
+local dirs = require("../lune_packages/dirs")
 
 local ZipReader = require("../lib")
 
@@ -38,17 +39,14 @@ return function(test: typeof(frktest.test))
 			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer
 
 			-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-			local tmpOut = "/tmp/unzip_meta_"
-				.. tostring(os.time())
-				.. "_"
-				.. tostring(math.random(1, 1_000_000_000))
-				.. ".txt"
+			local tempFile = dirs.createTempFile()
+			local tempFilePath = tempFile.path:toString()
 
-			local command = `unzip -p tests/data/pandoc_soft_links.zip pandoc-3.2-arm64/bin/pandoc > {tmpOut}`
+			local command = `unzip -p tests/data/pandoc_soft_links.zip pandoc-3.2-arm64/bin/pandoc > {tempFilePath}`
 			local execResult = process.exec("sh", { "-lc", command })
 
-			local expectedBin = fs.readFile(tmpOut)
-			fs.removeFile(tmpOut)
+			local expectedBin = fs.readFile(tempFilePath)
+			tempFile:removeFile()
 
 			check.is_true(execResult.ok)
 
@@ -83,23 +81,19 @@ return function(test: typeof(frktest.test))
 			local data = fs.readFile("tests/data/max_comment_size.zip")
 			local zip = ZipReader.load(buffer.fromstring(data))
 
-			-- local unzipResult = process.exec("unzip", { "-z", "tests/data/max_comment_size.zip" })
-			-- assert(unzipResult.ok)
+			-- Fix pipe buffer overload by writing data into temp file and reading the temp file
+			local tempFile = dirs.createTempFile()
+			local tempFilePath = tempFile.path:toString()
 
-			local tmpOut = "/tmp/unzip_meta_"
-				.. tostring(os.time())
-				.. "_"
-				.. tostring(math.random(1, 1_000_000_000))
-				.. ".txt"
-
-			local execResult = process.exec("sh", { "-lc", `unzip -z tests/data/max_comment_size.zip > {tmpOut}` })
-			local unzipStdout = fs.readFile(tmpOut)
-
-			fs.removeFile(tmpOut)
+			local command = `unzip -z tests/data/max_comment_size.zip > {tempFilePath}`
+			local execResult = process.exec("sh", { "-lc", command })
+			
+			local unzipOutput = fs.readFile(tempFilePath)
+			tempFile:removeFile()
 
 			assert(execResult.ok)
 
-			local commentData = assert(string.match(unzipStdout, "\n(.*)\n"))
+			local commentData = assert(string.match(unzipOutput, "\n(.*)\n"))
 
 			-- Check that the comment is the same as the one in the ZIP file (only compare hashes)
 			check.equal(serde.hash("blake3", commentData), serde.hash("blake3", zip.comment))
