@@ -5,7 +5,6 @@ local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 local dirs = require("../lune_packages/dirs")
 
-
 local readToEnd = require("../.lune/util/reader_utils").readToEnd
 local ZipReader = require("../lib")
 
@@ -46,13 +45,13 @@ return function(test: typeof(frktest.test))
 							return
 						end
 
-            -- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
-            -- prevent pipe backpressure, see `readToEnd`
+						-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+						-- prevent pipe backpressure, see `readToEnd`
 						local unzipChild = process.create("unzip", { "-p", zipPath, entry:getPath() })
-            local expectedBin = readToEnd(unzipChild.stdout) 
+						local expectedBin = readToEnd(unzipChild.stdout)
 
 						-- NOTE: We use assert since we don't know whether to expect true or false
-					  assert(unzipChild:status().ok)	
+						assert(unzipChild:status().ok)
 
 						-- Test string extraction
 						local contentString = zip:extract(entry, stringOptions) :: string

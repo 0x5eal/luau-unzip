@@ -37,15 +37,16 @@ return function(test: typeof(frktest.test))
 			local targetPath = zip:extract(entry, { type = "text" }) :: string
 			check.equal(targetPath, "pandoc")
 
-			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer 
+			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer
 
-      -- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
-      -- prevent pipe backpressure, see `readToEnd`
-			local unzipChild = process.create("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
-      
-      -- Compare data extracted by library against expected data chunk by chunk to prevent accumulation
-      -- of a lot of data before GC acts 
-      check.is_true(reader.readerEq(unzipChild.stdout, buffer.tostring(bin)))
+			-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+			-- prevent pipe backpressure, see `readToEnd`
+			local unzipChild =
+				process.create("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
+
+			-- Compare data extracted by library against expected data chunk by chunk to prevent accumulation
+			-- of a lot of data before GC acts
+			check.is_true(reader.readerEq(unzipChild.stdout, buffer.tostring(bin)))
 			check.is_true(unzipChild:status().ok)
 		end)
 
@@ -75,8 +76,8 @@ return function(test: typeof(frktest.test))
 			local data = fs.readFile("tests/data/max_comment_size.zip")
 			local zip = ZipReader.load(buffer.fromstring(data))
 
-      -- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
-      -- prevent pipe backpressure, see `readToEnd`
+			-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+			-- prevent pipe backpressure, see `readToEnd`
 			local unzipChild = process.create("unzip", { "-z", "tests/data/max_comment_size.zip" })
 			local unzipOutput = reader.readToEnd(unzipChild.stdout)
 

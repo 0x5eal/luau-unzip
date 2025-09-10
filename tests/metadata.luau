@@ -105,12 +105,12 @@ return function(test: typeof(frktest.test))
 					local data = fs.readFile(file)
 					local zip = unzip.load(buffer.fromstring(data))
 
-					-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
-          -- prevent pipe backpressure, see `readToEnd`
+					-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+					-- prevent pipe backpressure, see `readToEnd`
 					local unzipResult = process.create("unzip", { "-v", file })
 					local unzipOutput = readToEnd(unzipResult.stdout)
 
-          assert(unzipResult:status().ok)
+					assert(unzipResult:status().ok)
 
 					-- Parse unzip output
 					for line in string.gmatch(unzipOutput, "[^\r\n]+") do
