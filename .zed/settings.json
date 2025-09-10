@@ -4,14 +4,9 @@
     "luau-lsp": {
       "settings": {
         "luau-lsp": {
-          "sourcemap": {
-            "enabled": false
-          },
-          "require": {
-            "mode": "relativeToFile",
-            "directoryAliases": {
-              "@lune/": "~/.lune/.typedefs/0.8.9/",
-              "@testing/": ".lune/test-lib/"
+          "completion": {
+            "imports": {
+              "requireStyle": "alwaysRelative"
             }
           }
         }
