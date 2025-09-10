@@ -4,7 +4,6 @@ local serde = require("@lune/serde")
 
 local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
-local dirs = require("../lune_packages/dirs")
 
 local reader = require("../.lune/util/reader_utils")
 local ZipReader = require("../lib")
@@ -46,7 +45,7 @@ return function(test: typeof(frktest.test))
 
 			-- Compare data extracted by library against expected data chunk by chunk to prevent accumulation
 			-- of a lot of data before GC acts
-			check.is_true(reader.readerEq(unzipChild.stdout, buffer.tostring(bin)))
+			check.is_true(reader.readerEq(unzipChild.stdout :: reader.ChildProcessReader, buffer.tostring(bin)))
 			check.is_true(unzipChild:status().ok)
 		end)
 

@@ -3,7 +3,6 @@ local process = require("@lune/process")
 
 local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
-local dirs = require("../lune_packages/dirs")
 
 local readToEnd = require("../.lune/util/reader_utils").readToEnd
 local ZipReader = require("../lib")
