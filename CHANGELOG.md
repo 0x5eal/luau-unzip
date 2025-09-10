@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-09-10
+This update adds support for Luau's new require mechanism, bringing support for Lune versions v0.10.0+ and brings some performance improvements.
+
+### Added
+- Support for Luau's new require-by-string semantics, bumping MSLV to [0.669](https://github.com/luau-lang/luau/releases/tag/0.669) (Lune v0.10.x).
+### Fixed
+- Added test for edge-case of maximum comment size in ZIP data
+- Fixed test errors not being caught in CI
+### Changed
+- Added some newlines after heading in documentation generator for better formatting
+- Made markdown heading types follow hierarchy in documentation generator
+- Added zed editor LSP configs
+- Improved performance of the EoCD offset detection algorithm
+- Use `bit32.btest` instead `bit32.band` and not-equals check
+- Updated internal tools and nix CI infrastructure
+
 ## [0.1.3] - 2025-02-23
 This is a hotfix release to fix documentation not being displayed properly on the pesde package page.
 
@@ -18,14 +34,14 @@ This is a hotfix release to fix documentation not being displayed properly on th
 ## [0.1.2] - 2025-02-23 [YANKED]
 This update brings documentation and some bug fixes! Your IDE should now display information such as usage and best practices for this library when you hover over any of its exported items. The docs are also available on the web in the markdown format, which can be found on [the pesde package page](https://pesde.dev/packages/0x5eal/unzip/0.1.2/luau/docs/intro).
 
-### Added 
+### Added
 - Added doc comments powered by [moonwave](https://github.com/evaera/moonwave) ([#2](https://github.com/0x5eal/luau-unzip/pull/2))
 - Added markdown doc generator lune script and configured pesde docs
 ### Fixed
 - Fixed incorrect type signatures for some functions
 ### Changed
 - Applied `stylua` formatter on code
-- Bumped and pinned pesde version to v0.6.0 
+- Bumped and pinned pesde version to v0.6.0
 
 ## [0.1.1] - 2025-02-18
 ### Added
@@ -35,7 +51,7 @@ This update brings documentation and some bug fixes! Your IDE should now display
 - Fixed repeated path components when using `ZipEntry:getPath` for some ZIP files
 ### Changed
 - Pinned tooling dependencies (`stylua`, `luau-lsp`, `pesde`, `lune`) in manifest
-- README includes contributing guidelines and basic setup instructions 
+- README includes contributing guidelines and basic setup instructions
 - Updated dependencies
 
 ## [0.1.0] - 2025-01-12
@@ -47,7 +63,7 @@ This update brings documentation and some bug fixes! Your IDE should now display
 - `ZipEntry` now has a `compressedSize` field which indicates the size of the compressed data
 - Added method `ZipEntry:compressionEfficiency` to return compression efficiency in the form of a percentage
 - Added method `ZipEntry:unixMode` to parse and extract unix mode information from external file attributes
-- Added methods to handle path safety and sanitization were added to `ZipEntry`: 
+- Added methods to handle path safety and sanitization were added to `ZipEntry`:
 ```luau
 -- NOTE: All paths returned by methods use `/` as the path separator
 
@@ -103,6 +119,7 @@ assert(targetContents == followedTargetContents, "Symlink must lead to the targe
 - Initial library release :tada:
 
 [unreleased]: https://github.com/0x5eal/luau-unzip/commits/HEAD
+[0.1.4]: https://pesde.dev/packages/0x5eal/unzip/0.1.4/any
 [0.1.3]: https://pesde.dev/packages/0x5eal/unzip/0.1.3/any
 [0.1.2]: https://pesde.dev/packages/0x5eal/unzip/0.1.2/any
 [0.1.1]: https://pesde.dev/packages/0x5eal/unzip/0.1.1/any
@@ -110,4 +127,3 @@ assert(targetContents == followedTargetContents, "Symlink must lead to the targe
 [0.0.1]: https://pesde.dev/packages/0x5eal/unzip/0.0.1/any
 [0.0.1-rc.2]: https://pesde.dev/packages/0x5eal/unzip/0.0.1-rc.2/any
 [0.0.1-rc.1]: https://pesde.dev/packages/0x5eal/unzip/0.0.1-rc.1/any
-

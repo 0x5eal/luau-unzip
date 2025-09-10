@@ -1,5 +1,5 @@
 name = "0x5eal/unzip"
-version = "0.1.3"
+version = "0.1.4"
 description = "Unzip implementation in pure Luau"
 authors = ["Erica Marigold <hi@devcomp.xyz>"]
 repository = "https://github.com/0x5eal/luau-unzip"
@@ -13,8 +13,8 @@ includes = [
   	"docs/**/*.md"
 ]
 
-[engines]
-pesde = "=0.7.1"
+#[engines]
+#pesde = "=0.7.1"
 
 [scripts]
 tests = ".lune/tests/init.luau"
