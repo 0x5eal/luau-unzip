@@ -1,7 +1,7 @@
 local fs = require("@lune/fs")
 local process = require("@lune/process")
 
-local frktest = require("../lune_packages/frktest")
+local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 
 local ZipReader = require("../lib")
@@ -20,7 +20,7 @@ return function(test: typeof(frktest.test))
 			end
 
 			-- Get listing from zip command
-			local result = process.spawn("zip", { "-sf", "tests/data/files_and_dirs.zip" })
+			local result = process.exec("zip", { "-sf", "tests/data/files_and_dirs.zip" })
 			check.is_true(result.ok)
 			local zipOutput = result.stdout
 
@@ -63,7 +63,7 @@ return function(test: typeof(frktest.test))
 			local stats = zip:getStats()
 
 			-- Get file count from zip command
-			local result = process.spawn("zip", { "-sf", "tests/data/files_and_dirs.zip" })
+			local result = process.exec("zip", { "-sf", "tests/data/files_and_dirs.zip" })
 			check.is_true(result.ok)
 
 			-- Parse file count from last line of zip output

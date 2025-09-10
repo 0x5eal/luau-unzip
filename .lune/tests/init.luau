@@ -3,8 +3,8 @@
 local fs = require("@lune/fs")
 local process = require("@lune/process")
 
-local frktest = require("../../lune_packages/frktest")
-local reporter = require("./reporter")
+local frktest = require("../luau_packages/frktest")
+local reporter = require("@self/reporter")
 
 -- HACK: Cast require to allow for dynamic paths in strict mode
 -- A more proper solution would be to use luau.load instead, but
@@ -72,7 +72,7 @@ for _, test in discoverTests("tests") do
 		constructors.suite = frktest.test.skip.suite
 	end
 
-	require(`../../{test}`)(setmetatable(constructors, { __index = frktest.test }))
+	require(`../{testPath}`)(setmetatable(constructors, { __index = frktest.test }))
 end
 
 reporter.init()

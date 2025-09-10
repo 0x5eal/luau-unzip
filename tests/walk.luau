@@ -1,7 +1,7 @@
 local fs = require("@lune/fs")
 local process = require("@lune/process")
 
-local frktest = require("../lune_packages/frktest")
+local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 
 local ZipReader = require("../lib")
@@ -29,7 +29,7 @@ return function(test: typeof(frktest.test))
 				table.sort(entries)
 
 				-- Get entries from unzip command
-				local result = process.spawn("unzip", { "-l", file })
+				local result = process.exec("unzip", { "-l", file })
 				check.is_true(result.ok)
 
 				-- Parse unzip output into sorted array

@@ -48,7 +48,7 @@ jobs:
         run: nix develop -c pesde install --locked
 
       - name: Check formatting
-        run: nix develop -c lune run fmt -- --check
+        run: nix develop -c lune run fmt --check
 
   typecheck:
     runs-on: ubuntu-latest

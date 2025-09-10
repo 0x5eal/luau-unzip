@@ -3,12 +3,12 @@
 local process = require("@lune/process")
 local serde = require("@lune/serde")
 
-local moonwave = require("./moonwave")
-local logger = require("./log")
-local writeMarkdown = require("./markdown")
+local moonwave = require("@self/moonwave")
+local logger = require("@self/log")
+local writeMarkdown = require("@self/markdown")
 
 local function extract(input: string): (number, { moonwave.Item }?)
-	local res = process.spawn("moonwave-extractor", { "extract", input }, {
+	local res = process.exec("moonwave-extractor", { "extract", input }, {
 		stdio = {
 			stderr = "forward",
 		},

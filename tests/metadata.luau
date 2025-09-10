@@ -2,9 +2,10 @@ local fs = require("@lune/fs")
 local process = require("@lune/process")
 local DateTime = require("@lune/datetime")
 
-local frktest = require("../lune_packages/frktest")
+local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 
+local readToEnd = require("../.lune/util/reader_utils").readToEnd
 local unzip = require("../lib")
 
 local ZIPS = fs.readDir("tests/data")
@@ -103,13 +104,15 @@ return function(test: typeof(frktest.test))
 					local data = fs.readFile(file)
 					local zip = unzip.load(buffer.fromstring(data))
 
-					-- Get sizes from unzip command
-					local unzipResult = process.spawn("unzip", { "-v", file })
-					-- HACK: We use assert here since we don't know if we expect false or true
-					assert(unzipResult.ok)
+					-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+					-- prevent pipe backpressure, see `readToEnd`
+					local unzipResult = process.create("unzip", { "-v", file })
+					local unzipOutput = readToEnd(unzipResult.stdout)
+
+					assert(unzipResult:status().ok)
 
 					-- Parse unzip output
-					for line in string.gmatch(unzipResult.stdout, "[^\r\n]+") do
+					for line in string.gmatch(unzipOutput, "[^\r\n]+") do
 						if
 							not string.match(line, "^Archive:")
 							and not string.match(line, "^%s+Length")
@@ -128,7 +131,7 @@ return function(test: typeof(frktest.test))
 								check.not_nil(entry:unixMode())
 							end
 
-							local ok, zipinfoResult = pcall(process.spawn, "zipinfo", { file, name })
+							local ok, zipinfoResult = pcall(process.exec, "zipinfo", { file, name })
 							if ok then
 								-- Errors can only occur when there is a non utf-8 file name, in which case
 								-- we skip that file

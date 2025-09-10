@@ -2,9 +2,10 @@ local fs = require("@lune/fs")
 local process = require("@lune/process")
 local serde = require("@lune/serde")
 
-local frktest = require("../lune_packages/frktest")
+local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 
+local reader = require("../.lune/util/reader_utils")
 local ZipReader = require("../lib")
 
 return function(test: typeof(frktest.test))
@@ -36,13 +37,16 @@ return function(test: typeof(frktest.test))
 			check.equal(targetPath, "pandoc")
 
 			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer
-			local expectedBin =
-				process.spawn("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
-			check.is_true(expectedBin.ok)
 
-			-- Compare hashes instead of the entire binary to improve speed and not print out
-			-- the entire binary data in case there's a mismatch
-			check.equal(serde.hash("blake3", bin), serde.hash("blake3", expectedBin.stdout))
+			-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+			-- prevent pipe backpressure, see `readToEnd`
+			local unzipChild =
+				process.create("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
+
+			-- Compare data extracted by library against expected data chunk by chunk to prevent accumulation
+			-- of a lot of data before GC acts
+			check.is_true(reader.readerEq(unzipChild.stdout :: reader.ChildProcessReader, buffer.tostring(bin)))
+			check.is_true(unzipChild:status().ok)
 		end)
 
 		test.case("Extracts files with UTF8 names", function()
@@ -71,10 +75,14 @@ return function(test: typeof(frktest.test))
 			local data = fs.readFile("tests/data/max_comment_size.zip")
 			local zip = ZipReader.load(buffer.fromstring(data))
 
-			local unzipResult = process.spawn("unzip", { "-z", "tests/data/max_comment_size.zip" })
-			assert(unzipResult.ok)
+			-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and
+			-- prevent pipe backpressure, see `readToEnd`
+			local unzipChild = process.create("unzip", { "-z", "tests/data/max_comment_size.zip" })
+			local unzipOutput = reader.readToEnd(unzipChild.stdout)
 
-			local commentData = assert(string.match(unzipResult.stdout, "\n(.*)\n"))
+			assert(unzipChild:status().ok)
+
+			local commentData = assert(string.match(unzipOutput, "\n(.*)\n"))
 
 			-- Check that the comment is the same as the one in the ZIP file (only compare hashes)
 			check.equal(serde.hash("blake3", commentData), serde.hash("blake3", zip.comment))

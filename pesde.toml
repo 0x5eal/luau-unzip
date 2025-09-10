@@ -10,12 +10,11 @@ includes = [
 	"pesde.toml",
 	"lib/**/*.luau",
 	"!tests/**/*",
-  "docs/**/*.md"
+  	"docs/**/*.md"
 ]
 
 [engines]
-pesde = "=0.6.0"
-lune = "=0.8.9"
+pesde = "=0.7.1"
 
 [scripts]
 tests = ".lune/tests/init.luau"
@@ -31,7 +30,8 @@ lib = "lib/init.luau"
 default = "https://github.com/pesde-pkg/index"
 
 [dev_dependencies]
-stylua = { name = "pesde/stylua", version = "=2.0.2", target = "lune" }
-frktest = { name = "itsfrank/frktest", version = "^0.0.2", target = "lune" }
-asciitable = { name = "kimpure/asciitable", version = "^0.2.1" }
-luau-lsp = { name = "pesde/luau_lsp", version = "=1.39.2", target = "lune" }
+stylua = { name = "pesde/stylua", version = "=2.1.0", target = "lune" }
+frktest = { name = "itsfrank/frktest", version = "^0.0.4" }
+asciitable = { name = "kimpure/asciitable", version = "^0.2.3" }
+luau-lsp = { name = "pesde/luau_lsp", version = "=1.53.2", target = "lune" }
+dirs = { name = "jiwonz/dirs", version = "^0.6.0", target = "lune" }
