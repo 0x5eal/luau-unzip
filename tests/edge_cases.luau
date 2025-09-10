@@ -6,6 +6,7 @@ local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 local dirs = require("../lune_packages/dirs")
 
+local reader = require("../.lune/util/reader_utils")
 local ZipReader = require("../lib")
 
 return function(test: typeof(frktest.test))
@@ -36,23 +37,16 @@ return function(test: typeof(frktest.test))
 			local targetPath = zip:extract(entry, { type = "text" }) :: string
 			check.equal(targetPath, "pandoc")
 
-			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer
+			local bin = zip:extract(entry, { type = "text", followSymlinks = true }) :: buffer 
 
-			-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-			local tempFile = dirs.createTempFile()
-			local tempFilePath = tempFile.path:toString()
-
-			local command = `unzip -p tests/data/pandoc_soft_links.zip pandoc-3.2-arm64/bin/pandoc > {tempFilePath}`
-			local execResult = process.exec("sh", { "-lc", command })
-
-			local expectedBin = fs.readFile(tempFilePath)
-			tempFile:removeFile()
-
-			check.is_true(execResult.ok)
-
-			-- Compare hashes instead of the entire binary to improve speed and not print out
-			-- the entire binary data in case there's a mismatch
-			check.equal(serde.hash("blake3", bin), serde.hash("blake3", expectedBin))
+      -- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
+      -- prevent pipe backpressure, see `readToEnd`
+			local unzipChild = process.create("unzip", { "-p", "tests/data/pandoc_soft_links.zip", "pandoc-3.2-arm64/bin/pandoc" })
+      
+      -- Compare data extracted by library against expected data chunk by chunk to prevent accumulation
+      -- of a lot of data before GC acts 
+      check.is_true(reader.readerEq(unzipChild.stdout, buffer.tostring(bin)))
+			check.is_true(unzipChild:status().ok)
 		end)
 
 		test.case("Extracts files with UTF8 names", function()
@@ -81,17 +75,12 @@ return function(test: typeof(frktest.test))
 			local data = fs.readFile("tests/data/max_comment_size.zip")
 			local zip = ZipReader.load(buffer.fromstring(data))
 
-			-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-			local tempFile = dirs.createTempFile()
-			local tempFilePath = tempFile.path:toString()
+      -- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
+      -- prevent pipe backpressure, see `readToEnd`
+			local unzipChild = process.create("unzip", { "-z", "tests/data/max_comment_size.zip" })
+			local unzipOutput = reader.readToEnd(unzipChild.stdout)
 
-			local command = `unzip -z tests/data/max_comment_size.zip > {tempFilePath}`
-			local execResult = process.exec("sh", { "-lc", command })
-			
-			local unzipOutput = fs.readFile(tempFilePath)
-			tempFile:removeFile()
-
-			assert(execResult.ok)
+			assert(unzipChild:status().ok)
 
 			local commentData = assert(string.match(unzipOutput, "\n(.*)\n"))
 

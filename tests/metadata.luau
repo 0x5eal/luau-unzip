@@ -6,6 +6,7 @@ local frktest = require("../luau_packages/frktest")
 local check = frktest.assert.check
 local dirs = require("../lune_packages/dirs")
 
+local readToEnd = require("../.lune/util/reader_utils").readToEnd
 local unzip = require("../lib")
 
 local ZIPS = fs.readDir("tests/data")
@@ -104,17 +105,12 @@ return function(test: typeof(frktest.test))
 					local data = fs.readFile(file)
 					local zip = unzip.load(buffer.fromstring(data))
 
-					-- Fix pipe buffer overload by writing data into temp file and reading the temp file
-					local tempFile = dirs.createTempFile()
-					local tempFilePath = tempFile.path:toString()
+					-- NOTE: `process.create` instead of `process.exec` so we can continuously stream data and 
+          -- prevent pipe backpressure, see `readToEnd`
+					local unzipResult = process.create("unzip", { "-v", file })
+					local unzipOutput = readToEnd(unzipResult.stdout)
 
-					local command = `unzip -v {file} > {tempFilePath}`
-					local execResult = process.exec("sh", { "-lc", command })
-
-					local unzipOutput = fs.readFile(tempFilePath)
-					tempFile:removeFile()
-
-					assert(execResult.ok)
+          assert(unzipResult:status().ok)
 
 					-- Parse unzip output
 					for line in string.gmatch(unzipOutput, "[^\r\n]+") do
