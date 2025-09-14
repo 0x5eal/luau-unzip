@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [0.1.4] - 2025-09-10
+## [0.2.0] - 2025-09-14
+Republish of [0.1.4] as a breaking version bump, since migrating to the new Luau require mechanism could inadvertently break for consumers on an older version of Luau. No other changes.
+
+## [0.1.4] - 2025-09-10 [YANKED]
 This update adds support for Luau's new require mechanism, bringing support for Lune versions v0.10.0+ and brings some performance improvements.
 
 ### Added
@@ -119,6 +122,7 @@ assert(targetContents == followedTargetContents, "Symlink must lead to the targe
 - Initial library release :tada:
 
 [unreleased]: https://github.com/0x5eal/luau-unzip/commits/HEAD
+[0.2.0]: https://pesde.dev/packages/0x5eal/unzip/0.2.0/any
 [0.1.4]: https://pesde.dev/packages/0x5eal/unzip/0.1.4/any
 [0.1.3]: https://pesde.dev/packages/0x5eal/unzip/0.1.3/any
 [0.1.2]: https://pesde.dev/packages/0x5eal/unzip/0.1.2/any

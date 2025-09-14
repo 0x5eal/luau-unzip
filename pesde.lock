@@ -2,19 +2,18 @@
 # It is not intended for manual editing.
 format = 2
 name = "0x5eal/unzip"
-version = "0.1.4"
+version = "0.2.0"
 target = "luau"
 
-[graph."0x5eal/unzip@0.1.4 luau".pkg_ref]
+[graph."0x5eal/unzip@0.1.3 luau".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
-[graph."0x5eal/unzip@0.1.4 luau".pkg_ref.dependencies]
-asciitable = [{ name = "kimpure/asciitable", version = "^0.2.3", index = "https://github.com/pesde-pkg/index" }, "dev"]
-dirs = [{ name = "jiwonz/dirs", version = "^0.6.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
-frktest = [{ name = "itsfrank/frktest", version = "^0.0.4", index = "https://github.com/pesde-pkg/index" }, "dev"]
-luau-lsp = [{ name = "pesde/luau_lsp", version = "=1.53.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
-stylua = [{ name = "pesde/stylua", version = "=2.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+[graph."0x5eal/unzip@0.1.3 luau".pkg_ref.dependencies]
+asciitable = [{ name = "kimpure/asciitable", version = "^0.2.1", index = "https://github.com/pesde-pkg/index" }, "dev"]
+frktest = [{ name = "itsfrank/frktest", version = "^0.0.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+luau-lsp = [{ name = "pesde/luau_lsp", version = "=1.39.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+stylua = [{ name = "pesde/stylua", version = "=2.0.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
 [graph."corecii/greentea@0.4.11 lune".pkg_ref]
 ref_ty = "pesde"
@@ -178,7 +177,7 @@ dirs = ["jiwonz/dirs@0.3.0 lune", "standard"]
 option = ["lukadev_0/option@1.2.1 lune", "peer"]
 pathfs = ["jiwonz/pathfs@0.3.2 lune", "standard"]
 result = ["lukadev_0/result@1.2.1 lune", "peer"]
-unzip = ["0x5eal/unzip@0.1.4 luau", "standard"]
+unzip = ["0x5eal/unzip@0.1.3 luau", "standard"]
 
 [graph."pesde/toolchainlib@0.1.15 lune".pkg_ref]
 ref_ty = "pesde"
