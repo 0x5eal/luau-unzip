@@ -1,6 +1,6 @@
 {
-  "languageMode": "strict",
-  "aliases": {
-    "lune": "~/.lune/.typedefs/0.10.2/"
-  }
+    "languageMode": "strict",
+    "aliases": {
+      "lune": "~/.lune/.typedefs/0.10.2/"
+    }
 }
