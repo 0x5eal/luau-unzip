@@ -1,2 +1,3 @@
 *.hexproj
-*_packages/TODO.md
+*_packages
+/TODO.md
