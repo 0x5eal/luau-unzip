@@ -1,3 +1,34 @@
-*.hexproj
-*_packages
+# Build artifacts
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+/Build
+
+# Dependencies
+/DevPackages
+/Packages
+/ServerPackages
+
+# Editor and environment
+.claude
+.DS_Store
+.env
+.local
+.mcp.json
+.vscode
+
+# Generated files
+*.bak
+*.gen.*
+*.lock
+/*sourcemap.json
+
+# Legacy
+aftman.toml
+
+# Project
 /TODO.md
+
+# Repo-specific
+*.hexproj
