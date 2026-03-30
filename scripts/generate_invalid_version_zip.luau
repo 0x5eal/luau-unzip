@@ -1,3 +1,4 @@
+#!/usr/bin/env -S lune run
 local fs = require("@lune/fs")
 local stdio = require("@lune/stdio")
 local process = require("@lune/process")
