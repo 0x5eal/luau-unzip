@@ -130,11 +130,39 @@ export type MadeByOS = "FAT" | "AMIGA" | "VMS" | "UNIX" | "VM/CMS" | "Atari ST" 
 
 [MadeByOS]: #MadeByOS
 #### `CompressionMethod`
-The method used to compress the file:
-- `STORE` - No compression
-- `DEFLATE` - Compressed raw deflate chunks
+The method used to compress the file. See PKWARE APPNOTE §4.4.5 for details.
+
+| Method        | Code | Description               |
+|---------------|------|---------------------------|
+| `STORE`       |    0 | No compression            |
+| `SHRUNK`      |    1 | Shrunk                    |
+| `REDUCE_F1`   |    2 | Reduced factor 1          |
+| `REDUCE_F2`   |    3 | Reduced factor 2          |
+| `REDUCE_F3`   |    4 | Reduced factor 3          |
+| `REDUCE_F4`   |    5 | Reduced factor 4          |
+| `IMPLODE`     |    6 | Imploded                  |
+| `TOKENIZE`    |    7 | Reserved for Tokenizing   |
+| `DEFLATE`     |    8 | Deflated (supported)      |
+| `DEFLATE64`   |    9 | Enhanced Deflating        |
+| `IMPLODE_DCL` |   10 | PKWARE DCL Imploding      |
+| `BZIP2`       |   12 | BZIP2                     |
+| `LZMA`        |   14 | LZMA                      |
+| `CMPSC`       |   16 | IBM z/OS CMPSC            |
+| `TERSE`       |   18 | IBM TERSE (new)           |
+| `LZ77`        |   19 | IBM LZ77 z Architecture   |
+| `ZSTD`        |   93 | Zstandard                 |
+| `MP3`         |   94 | MP3 Compression           |
+| `XZ`          |   95 | XZ Compression            |
+| `JPEG`        |   96 | JPEG variant              |
+| `WAVPACK`     |   97 | WavPack                   |
+| `PPMD`        |   98 | PPMd version I, Rev 1     |
+| `AE_X`        |   99 | AE-x encryption marker    |
+
+Only `STORE` and `DEFLATE` are supported for extraction by this library.
+Custom decompression routines can be registered via [ZipReader.new] to support
+additional methods.
 ```luau
-export type CompressionMethod = "STORE" | "DEFLATE"
+export type CompressionMethod = "STORE" | "SHRUNK" | "REDUCE_F1" | "REDUCE_F2" | "REDUCE_F3" | "REDUCE_F4" | "IMPLODE" | "TOKENIZE" | "DEFLATE" | "DEFLATE64" | "IMPLODE_DCL" | "BZIP2" | "LZMA" | "CMPSC" | "TERSE" | "LZ77" | "ZSTD" | "MP3" | "XZ" | "JPEG" | "WAVPACK" | "PPMD" | "AE_X"
 ```
 
 [CompressionMethod]: #CompressionMethod
@@ -208,6 +236,7 @@ Creates a new ZipReader instance from the raw bytes of a ZIP file.
 ```luau
 ZipReader.new(
 	data: buffer, -- The buffer containing the raw bytes of the ZIP
+	methods: DecompressionRoutines?, -- Custom implementations for decompression methods
 ): ZipReader
 
 ```
@@ -352,6 +381,35 @@ ZipReader:getStats(): ZipStatistics
 [ZipReader:getStats]: #getStats
 
 ### Types
+#### `DecompressionRoutine`
+Represents a compression method's decompression implementation. 
+
+A default implementation is provided for all of [CompressionMethod]'s 
+variants but this may be used to override or provide implementations for 
+unsupported compression methods. 
+
+Accepted as an argument for [ZipReader.new].
+```luau
+export type DecompressionRoutine = {
+}
+```
+
+[DecompressionRoutine]: #DecompressionRoutine
+#### `DecompressionRoutines`
+> [!IMPORTANT]
+> This is a private type. It may be exported publicly, but try to avoid
+> using it, since its definition can have a breaking change at any time
+> without warning.
+
+Implementations for decompression methods, keyed by the method's ID. 
+
+See [CompressionMethod] to find the ID for a compression method.
+```luau
+export type DecompressionRoutines = {
+}
+```
+
+[DecompressionRoutines]: #DecompressionRoutines
 #### `EocdRecord`
 > [!IMPORTANT]
 > This is a private type. It may be exported publicly, but try to avoid
