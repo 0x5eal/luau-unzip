@@ -3,8 +3,8 @@ local Tree = {}
 
 export type Tree = typeof(setmetatable({} :: TreeInner, { __index = Tree }))
 type TreeInner = {
-	table: { number },   -- Length of 16, stores code length counts
-	trans: { number },   -- Length of 288, stores code to symbol translations
+	table: { number }, -- Length of 16, stores code length counts
+	trans: { number }, -- Length of 288, stores code to symbol translations
 	lookup: { number }?, -- Precomputed Huffman lookup table for fast path
 }
 
@@ -89,7 +89,7 @@ end
 -- value instead of 10 or 12 as they seemed to be slightly slower, potentially
 -- due to table memory overhead. In my testing using the `pandoc_soft_links`
 -- file, I found these throughputs:
--- 
+--
 -- - 10-bit (1024 entries): 15.0 MB / s
 -- - 12-bit (4096 entries): 11.5 MB / s
 -- - 9-bit  (512 entries):  17.2 MB / s
@@ -364,7 +364,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 	local dest = d.dest
 	local destLen = d.destLen
 	local destSize = buffer.len(dest)
-	
+
 	local lastGrowCheck = destLen
 
 	while true do
@@ -373,7 +373,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 		local entry = (lengthTree.lookup :: { number })[bit32.band(d.tag, LOOKUP_SIZE - 1)]
 		local len = bit32.band(entry, 0xFFFF)
 		local sym
-		
+
 		if len > 0 then
 			sym = bit32.rshift(entry, 16)
 			d.tag = bit32.rshift(d.tag, len)
@@ -383,7 +383,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 			local sum, cur = 0, 0
 			local tag = d.tag
 			len = 0
-			
+
 			repeat
 				cur = 2 * cur + bit32.band(tag, 1)
 				tag = bit32.rshift(tag, 1)
@@ -391,7 +391,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 				sum += lengthTree.table[len]
 				cur -= lengthTree.table[len]
 			until cur < 0
-			
+
 			d.tag = tag
 			d.bitcount -= len
 			sym = lengthTree.trans[sum + cur]
@@ -414,7 +414,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 
 				lastGrowCheck = destLen
 			end
-			
+
 			buffer.writeu8(dest, destLen, sym)
 			destLen += 1
 		elseif sym == 256 then
@@ -426,14 +426,14 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 			sym -= 257
 
 			local length = readBits(d, lengthBits[sym], lengthBase[sym])
-			
+
 			-- OPT: inlined `decodeSymbol` for distance tree
 			ensureBits(d, 15)
 			entry = (distTree.lookup :: { number })[bit32.band(d.tag, LOOKUP_SIZE - 1)]
 			len = bit32.band(entry, 0xFFFF)
-			
+
 			local dist
-			
+
 			if len > 0 then
 				dist = bit32.rshift(entry, 16)
 				d.tag = bit32.rshift(d.tag, len)
@@ -443,7 +443,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 				local sum, cur = 0, 0
 				local tag = d.tag
 				len = 0
-				
+
 				repeat
 					cur = 2 * cur + bit32.band(tag, 1)
 					tag = bit32.rshift(tag, 1)
@@ -451,12 +451,12 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 					sum += distTree.table[len]
 					cur -= distTree.table[len]
 				until cur < 0
-				
+
 				d.tag = tag
 				d.bitcount -= len
 				dist = distTree.trans[sum + cur]
 			end
-			
+
 			dist = readBits(d, distBits[dist], distBase[dist])
 			local offs = destLen - dist
 
@@ -464,9 +464,9 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 			if destLen + length > destSize then
 				local newSize = math.max(destSize * 2, destLen + length)
 				local newDest = buffer.create(newSize)
-				
+
 				buffer.copy(newDest, 0, dest, 0, destLen)
-				
+
 				dest = newDest
 				d.dest = newDest
 				destSize = newSize
@@ -483,7 +483,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 				buffer.copy(dest, destLen, dest, offs, length)
 				destLen += length
 			elseif length <= 8 then
-				-- OPT: small overlapping copies, we can unroll upto 8 bytes manually, 
+				-- OPT: small overlapping copies, we can unroll upto 8 bytes manually,
 				-- prepare for extremely ugly code ahead
 				if length <= 4 then
 					buffer.writeu8(dest, destLen, buffer.readu8(dest, offs))
@@ -500,7 +500,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 					buffer.writeu8(dest, destLen + 1, buffer.readu8(dest, offs + 1))
 					buffer.writeu8(dest, destLen + 2, buffer.readu8(dest, offs + 2))
 					buffer.writeu8(dest, destLen + 3, buffer.readu8(dest, offs + 3))
-					
+
 					if length > 4 then
 						buffer.writeu8(dest, destLen + 4, buffer.readu8(dest, offs + 4))
 						if length > 5 then
@@ -527,13 +527,13 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 				local chunkSize = dist
 				local chunks = length // chunkSize
 				local remainder = length % chunkSize
-				
+
 				for _ = 1, chunks do
 					buffer.copy(dest, destLen, dest, offs, chunkSize)
 					destLen += chunkSize
 					offs += chunkSize
 				end
-				
+
 				if remainder > 0 then
 					for i = 0, remainder - 1 do
 						buffer.writeu8(dest, destLen + i, buffer.readu8(dest, offs + i))
@@ -541,7 +541,7 @@ local function inflateBlockData(d: Data, lengthTree: Tree, distTree: Tree)
 					destLen += remainder
 				end
 			end
-			
+
 			lastGrowCheck = destLen
 		end
 	end
@@ -574,7 +574,7 @@ local function inflateUncompressedBlock(d: Data)
 	if d.destLen + length > destSize then
 		local newSize = math.max(destSize * 2, d.destLen + length)
 		local newDest = buffer.create(newSize)
-		
+
 		buffer.copy(newDest, 0, d.dest, 0, d.destLen)
 		d.dest = newDest
 	end
