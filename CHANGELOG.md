@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+This release brings major performance optimizations and the ability to override or define decompression method implementations. 
+
+For example, we can use the [ZUNE](https://github.com/Scythe-Technology/zune) runtime's `serde` library to add support for zstd and use a native inflate
+implementation instead of the default pure-Luau one:
+
+```luau
+local fs = zune.fs
+local serde = zune.serde
+local unzip = require("unzip")
+
+local function check(data: buffer, options: unzip.CrcValidationOptions)
+  if not options.skip then
+    assert(unzip.crc32(data) == options.expected, "CRC checksum mismatch")
+  end
+end
+
+local zipBuffer = fs.readFile("./path/to/file.zip", true)
+local zip = unzip.ZipReader.new(zipBuffer, {
+    -- Override DEFLATE with zune's native inflate implementation
+    [0x08] = {
+        name = "DEFLATE",
+        decompress = function(buf, _uncompressedSize, validation)
+            local decompressed = serde.flate.decompress(buf)
+            check(decompressed, validation)
+            return decompressed
+        end,
+    },
+    
+    -- Add support for ZSTD compression (method 93)
+    [0x5D] = {
+        name = "ZSTD",
+        decompress = function(buf, uncompressedSize, validation)
+            local decompressed = serde.zstd.decompress(buf)
+            check(decompressed, validation)
+            return decompressed
+        end,
+    },
+})
+
+-- Extract image to disk
+local entry = zip:findEntry("path/to/image.png")
+local data = zip:extract(entry, { type = "binary" ))
+
+fs.writeFile("image.png", data)
+```
+
+### Added
+- Support for custom decompression implementations via optional `methods` parameter in `ZipReader.new`
+- Exported new type `DecompressionRoutine` for defining custom decompression handlers
+### Changed
+- `CompressionMethod` type union expanded to include all supported compression methods as per the PKWARE spec
+- Improved inflate performance by approximately 48% (~11.5 MB/s → ~17 MB/s throughput) through:
+  - 9-bit Huffman lookup table for fast-path decoding
+  - Inlined symbol decoding in inner loop
+  - Batched buffer growth checks
+  - Optimized overlapping copy handling (unrolled small copies, chunked large copies)
+- Optimized CRC32 computation with 8-byte loop unrolling
+### Fixed
+- CRC validation error message now correctly displays expected vs computed hash instead of showing computed hash twice
 
 ## [0.2.0] - 2025-09-14
 Republish of [0.1.4] as a breaking version bump, since migrating to the new Luau require mechanism could inadvertently break for consumers on an older version of Luau. No other changes.
