@@ -1,5 +1,6 @@
 local inflate = require("@self/inflate")
 local validateCrc = require("@self/utils/validate_crc")
+local crc32 = require("@self/crc")
 local path = require("@self/utils/path")
 
 -- The maximum supported PKZIP format specification version that we support
@@ -1167,4 +1168,7 @@ return {
 	load = function(data: buffer)
 		return ZipReader.new(data)
 	end,
+
+	-- Optimized Cyclic Redundancy Check (CRC32) computation implementation
+	crc32 = crc32
 }
