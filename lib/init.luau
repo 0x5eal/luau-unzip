@@ -422,6 +422,18 @@ type ZipReaderInner = {
 }
 
 --[=[
+	@interface CrcValidationOptions
+	@within ZipReader
+
+	Options passed to a decompression routine regarding CRC checksum
+	validation.
+
+	@field expected number -- The expected hash provided in the ZIP
+	@field skip boolean -- Whether to skip validation altogether 
+]=]
+export type CrcValidationOptions = validateCrc.CrcValidationOptions
+
+--[=[
 	@interface DecompressionRoutine
 	@within ZipReader
 
@@ -435,7 +447,7 @@ type ZipReaderInner = {
 ]=]
 export type DecompressionRoutine = {
 	name: CompressionMethod,
-	decompress: (buffer, number, validateCrc.CrcValidationOptions) -> buffer,
+	decompress: (buffer, number, CrcValidationOptions) -> buffer,
 }
 
 --[=[
