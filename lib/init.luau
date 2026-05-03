@@ -1149,6 +1149,8 @@ function ZipReader.getStats(self: ZipReader): ZipStatistics
 end
 
 return {
+	ZipReader = ZipReader,
+	
 	-- Creates a `ZipReader` from a `buffer` of ZIP data.
 	load = function(data: buffer)
 		return ZipReader.new(data)
