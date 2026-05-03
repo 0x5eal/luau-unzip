@@ -128,19 +128,67 @@ export type MadeByOS =
 	| "OS/X"          -- 0x13; Darwin
 	| "Unknown"       -- 0x14 - 0xff; Unused
 
+-- stylua: ignore
 --[=[
 	@within ZipEntry
-	@type CompressionMethod "STORE" | "DEFLATE" | string
+	@type CompressionMethod "STORE" | "SHRUNK" | "REDUCE_F1" | "REDUCE_F2" | "REDUCE_F3" | "REDUCE_F4" | "IMPLODE" | "TOKENIZE" | "DEFLATE" | "DEFLATE64" | "IMPLODE_DCL" | "BZIP2" | "LZMA" | "CMPSC" | "TERSE" | "LZ77" | "ZSTD" | "MP3" | "XZ" | "JPEG" | "WAVPACK" | "PPMD" | "AE_X"
 
-	The method used to compress the file:
-	- `STORE` - No compression
-	- `DEFLATE` - Compressed raw deflate chunks
+	The method used to compress the file. See PKWARE APPNOTE §4.4.5 for details.
 
-	This type is extensible. If custom decompression routines are registered
-	during [ZipReader] initialization, any values outside of this union's 
-	variants defined may also be returned.
+	| Method        | Code | Description               |
+	|---------------|------|---------------------------|
+	| `STORE`       |    0 | No compression            |
+	| `SHRUNK`      |    1 | Shrunk                    |
+	| `REDUCE_F1`   |    2 | Reduced factor 1          |
+	| `REDUCE_F2`   |    3 | Reduced factor 2          |
+	| `REDUCE_F3`   |    4 | Reduced factor 3          |
+	| `REDUCE_F4`   |    5 | Reduced factor 4          |
+	| `IMPLODE`     |    6 | Imploded                  |
+	| `TOKENIZE`    |    7 | Reserved for Tokenizing   |
+	| `DEFLATE`     |    8 | Deflated (supported)      |
+	| `DEFLATE64`   |    9 | Enhanced Deflating        |
+	| `IMPLODE_DCL` |   10 | PKWARE DCL Imploding      |
+	| `BZIP2`       |   12 | BZIP2                     |
+	| `LZMA`        |   14 | LZMA                      |
+	| `CMPSC`       |   16 | IBM z/OS CMPSC            |
+	| `TERSE`       |   18 | IBM TERSE (new)           |
+	| `LZ77`        |   19 | IBM LZ77 z Architecture   |
+	| `ZSTD`        |   93 | Zstandard                 |
+	| `MP3`         |   94 | MP3 Compression           |
+	| `XZ`          |   95 | XZ Compression            |
+	| `JPEG`        |   96 | JPEG variant              |
+	| `WAVPACK`     |   97 | WavPack                   |
+	| `PPMD`        |   98 | PPMd version I, Rev 1     |
+	| `AE_X`        |   99 | AE-x encryption marker    |
+
+	Only `STORE` and `DEFLATE` are supported for extraction by this library.
+	Custom decompression routines can be registered via [ZipReader.new] to support
+	additional methods.
 ]=]
-export type CompressionMethod = "STORE" | "DEFLATE" | string
+export type CompressionMethod = 
+    | "STORE"       -- 0x00: No compression
+    | "SHRUNK"      -- 0x01: Shrunk
+    | "REDUCE_F1"   -- 0x02: Reduced factor 1
+    | "REDUCE_F2"   -- 0x03: Reduced factor 2
+    | "REDUCE_F3"   -- 0x04: Reduced factor 3
+    | "REDUCE_F4"   -- 0x05: Reduced factor 4
+    | "IMPLODE"     -- 0x06: Imploded
+    | "TOKENIZE"    -- 0x07: Reserved for Tokenizing
+    | "DEFLATE"     -- 0x08: Deflated (supported)
+    | "DEFLATE64"   -- 0x09: Enhanced Deflating
+    | "IMPLODE_DCL" -- 0x0A: PKWARE DCL Imploding
+    | "BZIP2"       -- 0x0C: BZIP2
+    | "LZMA"        -- 0x0E: LZMA
+    | "CMPSC"       -- 0x10: IBM z/OS CMPSC
+    | "TERSE"       -- 0x12: IBM TERSE (new)
+    | "LZ77"        -- 0x13: IBM LZ77 z Architecture
+    | "ZSTD"        -- 0x5D: Zstandard
+    | "MP3"         -- 0x5E: MP3 Compression
+    | "XZ"          -- 0x5F: XZ Compression
+    | "JPEG"        -- 0x60: JPEG variant
+    | "WAVPACK"     -- 0x61: WavPack
+    | "PPMD"        -- 0x62: PPMd version I, Rev 1
+    | "AE_X"        -- 0x63: AE-x encryption marker
 
 --[=[
 	@interface ZipEntryProperties
@@ -370,7 +418,7 @@ type ZipReaderInner = {
 	entries: { ZipEntry },
 	directories: { [string]: ZipEntry },
 	root: ZipEntry,
-	decompressionRoutines: DecompressionRoutines,
+	decompressionRoutines: DecompressionRoutinesWithDefaults,
 }
 
 --[=[
@@ -395,42 +443,37 @@ export type DecompressionRoutine = {
 	@within ZipReader
 	@private
 
-	Implementations for decompression methods, keyed by the method's ID. Find
-	below an excerpt from PKWARE APPNOTE.txt §4.4.5, containing all the
-	compression method IDs: 
-
-	```
-	0 - The file is stored (no compression)
-	1 - The file is Shrunk
-	2 - The file is Reduced with compression factor 1
-	3 - The file is Reduced with compression factor 2
-	4 - The file is Reduced with compression factor 3
-	5 - The file is Reduced with compression factor 4
-	6 - The file is Imploded
-	7 - Reserved for Tokenizing compression algorithm
-	8 - The file is Deflated
-	9 - Enhanced Deflating using Deflate64(tm)
-	10 - PKWARE Data Compression Library Imploding (old IBM TERSE)
-	11 - Reserved by PKWARE
-	12 - File is compressed using BZIP2 algorithm
-	13 - Reserved by PKWARE
-	14 - LZMA
-	15 - Reserved by PKWARE
-	16 - IBM z/OS CMPSC Compression
-	17 - Reserved by PKWARE
-	18 - File is compressed using IBM TERSE (new)
-	19 - IBM LZ77 z Architecture 
-	20 - deprecated (use method 93 for zstd)
-	93 - Zstandard (zstd) Compression 
-	94 - MP3 Compression 
-	95 - XZ Compression 
-	96 - JPEG variant
-	97 - WavPack compressed data
-	98 - PPMd version I, Rev 1
-	99 - AE-x encryption marker (see APPENDIX E)
-	```
+	Implementations for decompression methods, keyed by the method's ID. 
+	
+	See [CompressionMethod] to find the ID for a compression method.
 ]=]
 type DecompressionRoutines = { [number]: DecompressionRoutine }
+type DecompressionRoutinesWithDefaults = typeof(setmetatable(
+	{} :: DecompressionRoutines,
+	{ __index = {} :: DecompressionRoutines }
+))
+
+-- Default implementations for supported decompression routines
+local DEFAULT_DECOMPRESSION_ROUTINES: DecompressionRoutines = {
+	-- `STORE` decompression method - No compression
+	[0x00] = {
+		name = "STORE",
+		decompress = function(buf, _, validation): buffer
+			validateCrc(buf, validation)
+			return buf
+		end,
+	},
+
+	-- `DEFLATE` decompression method - Compressed raw deflate chunks
+	[0x08] = {
+		name = "DEFLATE",
+		decompress = function(buf, uncompressedSize, validation): buffer
+			local decompressed = inflate(buf, uncompressedSize)
+			validateCrc(decompressed, validation)
+			return decompressed
+		end,
+	},
+}
 
 --[=[
 	@within ZipReader
@@ -448,32 +491,17 @@ function ZipReader.new(data: buffer, methods: DecompressionRoutines?): ZipReader
 	local root = ZipEntry.new(0, "/", EMPTY_PROPERTIES)
 	root.isDirectory = true
 
+	local decompressionRoutines = setmetatable((methods or {}) :: DecompressionRoutines, {
+		__index = DEFAULT_DECOMPRESSION_ROUTINES,
+	}) :: DecompressionRoutinesWithDefaults
+
 	local this = setmetatable(
 		{
 			data = data,
 			entries = {},
 			directories = {},
 			root = root,
-			decompressionRoutines = methods or {
-				-- `STORE` decompression method - No compression
-				[0x00] = {
-					name = "STORE",
-					decompress = function(buf, _, validation): buffer
-						validateCrc(buf, validation)
-						return buf
-					end,
-				},
-
-				-- `DEFLATE` decompression method - Compressed raw deflate chunks
-				[0x08] = {
-					name = "DEFLATE",
-					decompress = function(buf, uncompressedSize, validation): buffer
-						local decompressed = inflate(buf, uncompressedSize)
-						validateCrc(decompressed, validation)
-						return decompressed
-					end,
-				},
-			},
+			decompressionRoutines = decompressionRoutines,
 		} :: ZipReaderInner,
 		{ __index = ZipReader }
 	)
