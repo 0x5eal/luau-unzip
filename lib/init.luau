@@ -17,29 +17,6 @@ local SIGNATURES = table.freeze({
 	END_OF_CENTRAL_DIR = 0x06054b50,
 })
 
--- Decompression routines for each supported compression method
-local DECOMPRESSION_ROUTINES: { [number]: { name: CompressionMethod, decompress: (buffer, number, validateCrc.CrcValidationOptions) -> buffer } } =
-	{
-		-- `STORE` decompression method - No compression
-		[0x00] = {
-			name = "STORE" :: CompressionMethod,
-			decompress = function(buf, _, validation): buffer
-				validateCrc(buf, validation)
-				return buf
-			end,
-		},
-
-		-- `DEFLATE` decompression method - Compressed raw deflate chunks
-		[0x08] = {
-			name = "DEFLATE" :: CompressionMethod,
-			decompress = function(buf, uncompressedSize, validation): buffer
-				local decompressed = inflate(buf, uncompressedSize)
-				validateCrc(decompressed, validation)
-				return decompressed
-			end,
-		},
-	}
-
 -- Set of placeholder entry properties for incompatible entries
 local EMPTY_PROPERTIES: ZipEntryProperties = table.freeze({
 	versionMadeBy = 0,
@@ -153,13 +130,17 @@ export type MadeByOS =
 
 --[=[
 	@within ZipEntry
-	@type CompressionMethod "STORE" | "DEFLATE"
+	@type CompressionMethod "STORE" | "DEFLATE" | string
 
 	The method used to compress the file:
 	- `STORE` - No compression
 	- `DEFLATE` - Compressed raw deflate chunks
+
+	This type is extensible. If custom decompression routines are registered
+	during [ZipReader] initialization, any values outside of this union's 
+	variants defined may also be returned.
 ]=]
-export type CompressionMethod = "STORE" | "DEFLATE"
+export type CompressionMethod = "STORE" | "DEFLATE" | string
 
 --[=[
 	@interface ZipEntryProperties
@@ -389,7 +370,67 @@ type ZipReaderInner = {
 	entries: { ZipEntry },
 	directories: { [string]: ZipEntry },
 	root: ZipEntry,
+	decompressionRoutines: DecompressionRoutines,
 }
+
+--[=[
+	@interface DecompressionRoutine
+	@within ZipReader
+
+	Represents a compression method's decompression implementation. 
+	
+	A default implementation is provided for all of [CompressionMethod]'s 
+	variants but this may be used to override or provide implementations for 
+	unsupported compression methods. 
+
+	Accepted as an argument for [ZipReader.new].
+]=]
+export type DecompressionRoutine = {
+	name: CompressionMethod,
+	decompress: (buffer, number, validateCrc.CrcValidationOptions) -> buffer,
+}
+
+--[=[
+	@interface DecompressionRoutines
+	@within ZipReader
+	@private
+
+	Implementations for decompression methods, keyed by the method's ID. Find
+	below an excerpt from PKWARE APPNOTE.txt §4.4.5, containing all the
+	compression method IDs: 
+
+	```
+	0 - The file is stored (no compression)
+	1 - The file is Shrunk
+	2 - The file is Reduced with compression factor 1
+	3 - The file is Reduced with compression factor 2
+	4 - The file is Reduced with compression factor 3
+	5 - The file is Reduced with compression factor 4
+	6 - The file is Imploded
+	7 - Reserved for Tokenizing compression algorithm
+	8 - The file is Deflated
+	9 - Enhanced Deflating using Deflate64(tm)
+	10 - PKWARE Data Compression Library Imploding (old IBM TERSE)
+	11 - Reserved by PKWARE
+	12 - File is compressed using BZIP2 algorithm
+	13 - Reserved by PKWARE
+	14 - LZMA
+	15 - Reserved by PKWARE
+	16 - IBM z/OS CMPSC Compression
+	17 - Reserved by PKWARE
+	18 - File is compressed using IBM TERSE (new)
+	19 - IBM LZ77 z Architecture 
+	20 - deprecated (use method 93 for zstd)
+	93 - Zstandard (zstd) Compression 
+	94 - MP3 Compression 
+	95 - XZ Compression 
+	96 - JPEG variant
+	97 - WavPack compressed data
+	98 - PPMd version I, Rev 1
+	99 - AE-x encryption marker (see APPENDIX E)
+	```
+]=]
+type DecompressionRoutines = { [number]: DecompressionRoutine }
 
 --[=[
 	@within ZipReader
@@ -400,9 +441,10 @@ type ZipReaderInner = {
 	**Errors if the ZIP file is invalid.**
 
 	@param data buffer -- The buffer containing the raw bytes of the ZIP
+	@param methods DecompressionRoutines? -- Custom implementations for decompression methods
 	@return ZipReader -- The new ZipReader instance
 ]=]
-function ZipReader.new(data): ZipReader
+function ZipReader.new(data: buffer, methods: DecompressionRoutines?): ZipReader
 	local root = ZipEntry.new(0, "/", EMPTY_PROPERTIES)
 	root.isDirectory = true
 
@@ -412,6 +454,26 @@ function ZipReader.new(data): ZipReader
 			entries = {},
 			directories = {},
 			root = root,
+			decompressionRoutines = methods or {
+				-- `STORE` decompression method - No compression
+				[0x00] = {
+					name = "STORE",
+					decompress = function(buf, _, validation): buffer
+						validateCrc(buf, validation)
+						return buf
+					end,
+				},
+
+				-- `DEFLATE` decompression method - Compressed raw deflate chunks
+				[0x08] = {
+					name = "DEFLATE",
+					decompress = function(buf, uncompressedSize, validation): buffer
+						local decompressed = inflate(buf, uncompressedSize)
+						validateCrc(decompressed, validation)
+						return decompressed
+					end,
+				},
+			},
 		} :: ZipReaderInner,
 		{ __index = ZipReader }
 	)
@@ -626,7 +688,7 @@ function ZipReader.parseCentralDirectory(self: ZipReader): ()
 				compressedSize = compressedSize,
 				size = size,
 				crc = crc,
-				method = DECOMPRESSION_ROUTINES[compressionMethod].name :: CompressionMethod,
+				method = self.decompressionRoutines[compressionMethod].name :: CompressionMethod,
 				timestamp = timestamp,
 				attributes = externalAttrs,
 				isText = bit32.btest(internalAttrs, 0x0001),
@@ -895,7 +957,7 @@ function ZipReader.extract(self: ZipReader, entry: ZipEntry, options: Extraction
 
 	if optionsOrDefault.decompress then
 		local compressionMethod = buffer.readu16(self.data, entry.offset + 8)
-		local algo = DECOMPRESSION_ROUTINES[compressionMethod]
+		local algo = self.decompressionRoutines[compressionMethod]
 		if algo == nil then
 			error(`Unsupported compression, ID: {compressionMethod}`)
 		end
