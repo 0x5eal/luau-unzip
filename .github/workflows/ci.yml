@@ -114,6 +114,11 @@ jobs:
       - name: Install dependencies
         run: nix develop -c pesde install --locked
 
+      - name: Generate test data
+        run: |
+          lune run scripts/generate_invalid_version_zip.luau 64
+          lune run scripts/generate_inflate_testdata.luau
+
       - name: Run tests
         run: |
           # HACK: Since the exit code isn't properly reflected due to frktest not returning
