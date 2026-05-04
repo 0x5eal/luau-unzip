@@ -381,6 +381,19 @@ ZipReader:getStats(): ZipStatistics
 [ZipReader:getStats]: #getStats
 
 ### Types
+#### `CrcValidationOptions`
+Options passed to a decompression routine regarding CRC checksum
+validation.
+```luau
+export type CrcValidationOptions = {
+	expected: number,
+	skip: boolean,
+}
+```
+- **expected** - The expected hash provided in the ZIP
+- **skip** - Whether to skip validation altogether
+
+[CrcValidationOptions]: #CrcValidationOptions
 #### `DecompressionRoutine`
 Represents a compression method's decompression implementation. 
 
