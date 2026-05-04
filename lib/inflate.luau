@@ -599,7 +599,7 @@ local function uncompress(source: buffer, uncompressedSize: number?): buffer
 		-- If the uncompressed size is known, we use that, otherwise we use a default
 		-- size that is a 7 times more than the compressed size; this factor works
 		-- well for most cases other than those with a very high compression ratio
-		uncompressedSize or buffer.len(source) * 7
+		if uncompressedSize and uncompressedSize > 0 then uncompressedSize else buffer.len(source) * 7
 	)
 	local d = Data.new(source, dest)
 
