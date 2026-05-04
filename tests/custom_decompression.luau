@@ -16,16 +16,19 @@ return function(test: typeof(frktest.test))
 			local validationPassed = false
 
 			local data = fs.readFile("tests/data/files_and_dirs.zip")
-			local zip = unzip.ZipReader.new(buffer.fromstring(data), {
-				[0x00] = {
-					name = "STORE",
-					decompress = function(buf, _, validation)
-						customCalled = true
-						validationPassed = not validation.skip
-						return buf
-					end,
-				},
-			} :: DecompressionRoutines)
+			local zip = unzip.ZipReader.new(
+				buffer.fromstring(data),
+				{
+					[0x00] = {
+						name = "STORE",
+						decompress = function(buf, _, validation)
+							customCalled = true
+							validationPassed = not validation.skip
+							return buf
+						end,
+					},
+				} :: DecompressionRoutines
+			)
 
 			local entry = assert(zip:findEntry("file0.txt"))
 			zip:extract(entry, { type = "binary", decompress = true })
@@ -36,17 +39,20 @@ return function(test: typeof(frktest.test))
 
 		test.case("Fallback to default when custom method not provided", function()
 			local data = fs.readFile("tests/data/data_descriptor.zip")
-			local zip = unzip.ZipReader.new(buffer.fromstring(data), {
-				-- STORE implementation is provided, but file is DEFLATE compressed and
-				-- no custom implementation for it is provided. It should fall back to
-				-- the default implementation correctly
-				[0x00] = {
-					name = "STORE",
-					decompress = function(buf, _, validation)
-						return buf -- no-op override
-					end,
-				},
-			} :: DecompressionRoutines)
+			local zip = unzip.ZipReader.new(
+				buffer.fromstring(data),
+				{
+					-- STORE implementation is provided, but file is DEFLATE compressed and
+					-- no custom implementation for it is provided. It should fall back to
+					-- the default implementation correctly
+					[0x00] = {
+						name = "STORE",
+						decompress = function(buf, _, validation)
+							return buf -- no-op override
+						end,
+					},
+				} :: DecompressionRoutines
+			)
 
 			local entry = assert(zip:findEntry("hello.txt"))
 			local content = zip:extract(entry, { type = "text" })
@@ -56,23 +62,26 @@ return function(test: typeof(frktest.test))
 
 		test.case("Implement new compression method (zstd)", function()
 			local data = fs.readFile("tests/data/zstd.zip")
-			local zip = unzip.ZipReader.new(buffer.fromstring(data), {
-				-- Custom ZSTD implementation, backed by `@lune/serde`
-				[0x5D] = {
-					name = "ZSTD",
-					decompress = function(buf, _, validation)
-						local decompressed = serde.decompress("zstd", buffer.tostring(buf))
-						local result = buffer.fromstring(decompressed)
-						
-						if not validation.skip then
-							local computed = unzip.crc32(result)
-							check.equal(computed, validation.expected)
-						end
+			local zip = unzip.ZipReader.new(
+				buffer.fromstring(data),
+				{
+					-- Custom ZSTD implementation, backed by `@lune/serde`
+					[0x5D] = {
+						name = "ZSTD",
+						decompress = function(buf, _, validation)
+							local decompressed = serde.decompress("zstd", buffer.tostring(buf))
+							local result = buffer.fromstring(decompressed)
 
-						return result
-					end,
-				},
-			} :: DecompressionRoutines)
+							if not validation.skip then
+								local computed = unzip.crc32(result)
+								check.equal(computed, validation.expected)
+							end
+
+							return result
+						end,
+					},
+				} :: DecompressionRoutines
+			)
 
 			local entry = assert(zip:findEntry("zstd_test.txt"))
 			local content = zip:extract(entry, { type = "text" })

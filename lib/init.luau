@@ -1163,12 +1163,12 @@ end
 
 return {
 	ZipReader = ZipReader,
-	
+
 	-- Creates a `ZipReader` from a `buffer` of ZIP data.
 	load = function(data: buffer)
 		return ZipReader.new(data)
 	end,
 
 	-- Optimized Cyclic Redundancy Check (CRC32) computation implementation
-	crc32 = crc32
+	crc32 = crc32,
 }

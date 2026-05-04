@@ -167,7 +167,7 @@ local function buildLookupTable(t: Tree)
 			cur = 2 * cur + bit32.band(bits, 1)
 			bits = bit32.rshift(bits, 1)
 			len += 1
-			
+
 			-- Huffman codes cannot be longer than 15 bits
 			if len > 15 then
 				break
