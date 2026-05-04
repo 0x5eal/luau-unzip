@@ -34,8 +34,8 @@ local function discoverTests(dir: string): { string }
 			continue
 		end
 
-		-- Recurse for directories
-		if fs.isDir(path) then
+		-- Recurse for directories, skip test data directory entirely
+		if fs.isDir(path) and dir ~= "tests/data" then
 			local dirResults = discoverTests(path)
 			table.move(dirResults, 1, #dirResults, #tests + 1, tests)
 			continue

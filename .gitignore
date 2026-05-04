@@ -1,2 +1,4 @@
 *.hexproj
 *_packages/
+tests/data/inflate
+!tests/data/inflate/cases.luau
