@@ -30,8 +30,8 @@ lib = "lib/init.luau"
 default = "https://github.com/pesde-pkg/index"
 
 [dev_dependencies]
-stylua = { name = "pesde/stylua", version = "=2.1.0", target = "lune" }
+stylua = { name = "pesde/stylua", version = "=2.4.1", target = "lune" }
 frktest = { name = "itsfrank/frktest", version = "^0.0.4" }
-asciitable = { name = "kimpure/asciitable", version = "^0.2.3" }
-luau-lsp = { name = "pesde/luau_lsp", version = "=1.53.2", target = "lune" }
+asciitable = { name = "kimpure/asciitable", version = "^0.3.8" }
+luau-lsp = { name = "pesde/luau_lsp", version = "=1.66.1", target = "lune" }
 dirs = { name = "jiwonz/dirs", version = "^0.6.0", target = "lune" }

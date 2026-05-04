@@ -1,7 +1,7 @@
 {
   description = "luau-unzip development environment";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/release-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/release-25.11";
   };
 
   outputs = { self, nixpkgs, ... }:

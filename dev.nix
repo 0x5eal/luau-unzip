@@ -106,16 +106,16 @@ pkgs.mkShell {
 	(fromGithubRelease {
       name = "lune-org/lune";
       exeName = "lune";
-      version = "v0.10.2";
-      artifactName = "lune-0.10.2-linux-x86_64.zip";
-      sha256 = "8U1qktadMqgLtz2aKFCkOSMn4CrOhxaJWOZaBuaoQvA=";
+      version = "v0.10.4";
+      artifactName = "lune-0.10.4-linux-x86_64.zip";
+      sha256 = "1PzqQdCcSfC/fc/yKFQszDij2agOGF6DK9Rt0edOhF4=";
     })
     (fromGithubRelease {
       name = "pesde-pkg/pesde";
       exeName = "pesde";
-      version = "v0.7.1+registry.0.2.3";
-      artifactName = "pesde-0.7.1-linux-x86_64.zip";
-      sha256 = "Df1tyq0cDt6dvU7usPdOVwcaY6yNF7ths/TGhhq2X24=";
+      version = "v0.7.3+registry.0.2.3";
+      artifactName = "pesde-0.7.3-linux-x86_64.zip";
+      sha256 = "uqTZr7w6Eet+2xtmGAVkO+991YQ/Nltd6yE+oUNRvsw=";
     })
     (fromGithubRelease {
       name = "evaera/moonwave";
@@ -129,14 +129,14 @@ pkgs.mkShell {
       exeName = "luau-lsp";
       pesdePackage = "pesde/luau_lsp";
       artifactName = "luau-lsp-linux-x86_64.zip";
-      sha256 = "vyQUyJnBSRJl/18Y7sbk2f2BW5pzXz+YUcJ9Cv2zngo=";
+      sha256 = "4Qx3XSHVlJeE5gCSdT9Km5ZaihHphyGipdp7eIIfGEI=";
     })
     (fromPesdeManifest {
       name = "JohnnyMorganz/StyLua";
       exeName = "stylua";
-	  pesdePackage = "pesde/stylua";
+	    pesdePackage = "pesde/stylua";
       artifactName = "stylua-linux-x86_64.zip";
-      sha256 = "24VY/zesW5+t7dP0jMD4jHR/xYUHqKVG3utkmTetjHY=";
+      sha256 = "9cGkl5lQlneiCetH27m2ZRuHaZd4vvtaXPelfqaPoL8=";
     })
   ];
 
