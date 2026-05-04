@@ -15,6 +15,7 @@ local FALLIBLES = {
 	"invalid_offset.zip",
 	"invalid_offset2.zip",
 	"chinese.zip", -- Contains non local specific encoding which can't be parsed without OS APIs
+	"zstd.zip", -- Uses ZSTD compression which requires custom implementation
 }
 
 return function(test: typeof(frktest.test))
