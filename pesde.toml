@@ -21,6 +21,7 @@ tests = ".lune/tests/init.luau"
 fmt = ".lune/fmt.luau"
 typecheck = ".lune/typecheck.luau"
 generate_invalid_version_zip = "scripts/generate_invalid_version_zip.luau"
+generate_inflate_testdata = "scripts/generate_inflate_testdata.luau"
 
 [target]
 environment = "luau"
