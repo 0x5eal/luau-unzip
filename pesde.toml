@@ -1,5 +1,5 @@
 name = "0x5eal/unzip"
-version = "0.2.0"
+version = "0.2.1"
 description = "Unzip implementation in pure Luau"
 authors = ["Erica Marigold <hi@devcomp.xyz>"]
 repository = "https://github.com/0x5eal/luau-unzip"

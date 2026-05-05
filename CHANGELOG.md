@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.1] - 2026-05-05
 This release brings major performance optimizations and the ability to override or define decompression method implementations. 
 
 For example, we can use the [ZUNE](https://github.com/Scythe-Technology/zune) runtime's `serde` library to add support for zstd and use a native inflate
@@ -181,6 +183,7 @@ assert(targetContents == followedTargetContents, "Symlink must lead to the targe
 - Initial library release :tada:
 
 [unreleased]: https://github.com/0x5eal/luau-unzip/commits/HEAD
+[0.2.1]: https://pesde.dev/packages/0x5eal/unzip/0.2.1/any
 [0.2.0]: https://pesde.dev/packages/0x5eal/unzip/0.2.0/any
 [0.1.4]: https://pesde.dev/packages/0x5eal/unzip/0.1.4/any
 [0.1.3]: https://pesde.dev/packages/0x5eal/unzip/0.1.3/any
