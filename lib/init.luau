@@ -26,7 +26,7 @@ local EMPTY_PROPERTIES: ZipEntryProperties = table.freeze({
 	attributes = 0,
 	timestamp = 0,
 	crc = 0,
-})
+} :: any) -- FIXME: bidirectional typing breaks for Luau with `table.freeze`
 
 -- Lookup table for the OS that created the ZIP
 local MADE_BY_OS_LOOKUP: { [number]: MadeByOS } = {
@@ -760,7 +760,7 @@ function ZipReader.buildDirectoryTree(self: ZipReader): ()
 	-- directories and files in separate passes over the entries, or sort
 	-- the entries so I handled the directories first -- I decided to do
 	-- the latter
-	table.sort(self.entries, function(a, b)
+	table.sort(self.entries, function(a: ZipEntry, b: ZipEntry)
 		if a.isDirectory ~= b.isDirectory then
 			return a.isDirectory
 		end
@@ -932,7 +932,7 @@ function ZipReader.extract(self: ZipReader, entry: ZipEntry, options: Extraction
 		skipSizeValidation: boolean,
 	} = if options
 		then setmetatable(options, { __index = defaultOptions }) :: any
-		else defaultOptions
+		else defaultOptions :: any
 
 	local pos = entry.offset
 	if buffer.readu32(self.data, pos) ~= SIGNATURES.LOCAL_FILE then
