@@ -3,8 +3,8 @@ local Tree = {}
 
 export type Tree = typeof(setmetatable({} :: TreeInner, { __index = Tree }))
 type TreeInner = {
-	table: { number }, -- Length of 16, stores code length counts
-	trans: { number }, -- Length of 288, stores code to symbol translations
+	table: { number },   -- Length of 16, stores code length counts
+	trans: { number },   -- Length of 288, stores code to symbol translations
 	lookup: { number }?, -- Precomputed Huffman lookup table for fast path
 }
 
@@ -237,11 +237,19 @@ local function ensureBits(d: Data, minBits: number)
 		d.sourceIndex += 1
 		d.bitcount += 8
 	end
+
+	if d.bitcount <= 0 and d.sourceIndex >= d.sourceLen then
+		error("unexpected end of input")
+	end
 end
 
 --- Reads a single bit from the input stream
 local function getBit(d: Data): number
 	if d.bitcount <= 0 then
+		if d.sourceIndex >= d.sourceLen then
+			error("unexpected end of input")
+		end
+
 		d.tag = buffer.readu8(d.source, d.sourceIndex)
 		d.sourceIndex += 1
 		d.bitcount = 8
