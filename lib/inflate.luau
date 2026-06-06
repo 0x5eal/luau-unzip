@@ -3,8 +3,8 @@ local Tree = {}
 
 export type Tree = typeof(setmetatable({} :: TreeInner, { __index = Tree }))
 type TreeInner = {
-	table: { number },   -- Length of 16, stores code length counts
-	trans: { number },   -- Length of 288, stores code to symbol translations
+	table: { number }, -- Length of 16, stores code length counts
+	trans: { number }, -- Length of 288, stores code to symbol translations
 	lookup: { number }?, -- Precomputed Huffman lookup table for fast path
 }
 
